@@ -7,7 +7,7 @@ tags: [typescript, http, framework, openapi]
 
 ## Directive
 
-All HTTP APIs must be built with Hono using `@hono/zod-openapi`. All routes must be defined with `createRoute` and registered via `app.openapi`. Plain `app.get` / `app.post` routes are not permitted in production code.
+All HTTP APIs must be built with Hono using `@hono/zod-openapi`. Routes must be defined with `createRoute` and registered via `app.openapi`. Plain `app.get` / `app.post` may be used where `app.openapi` is not applicable (e.g., serving generated documentation).
 
 ## Context and Problem Statement
 
@@ -86,7 +86,7 @@ app.openapi(users_id_get.route, users_id_get.handler);
 
 ### Confirmation
 
-All HTTP routes must be defined using `createRoute` from `@hono/zod-openapi` and registered via `app.openapi`. Plain `app.get` / `app.post` routes are not permitted in production code.
+All HTTP routes must be defined using `createRoute` from `@hono/zod-openapi` and registered via `app.openapi`. Plain `app.get` / `app.post` are permitted where `app.openapi` is not applicable (e.g., serving generated documentation).
 
 ## Pros and Cons of the Options
 

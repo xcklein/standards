@@ -7,7 +7,7 @@ tags: [api, openapi, documentation, tooling]
 
 ## Directive
 
-Every API must serve an OpenAPI 3.1 schema at `/openapi.json`. The schema must be validated with Spectral in CI.
+Every API must serve an OpenAPI 3.1 schema at a well-known path (e.g. `/openapi.json`). The schema must be validated with Spectral in CI.
 
 ## Context and Problem Statement
 
@@ -32,11 +32,7 @@ Chosen option: "OpenAPI 3.1", because it is the industry standard for describing
 
 ### Examples
 
-The schema must be served at a well-known path:
-
-```
-GET /openapi.json
-```
+The schema must be served at a well-known path. The exact route may vary by project (e.g. `/openapi.json`, `/api/openapi.json`), but it must be documented and consistent within the service.
 
 Minimum viable OpenAPI 3.1 document structure:
 
@@ -88,7 +84,7 @@ components:
 
 ### Confirmation
 
-Every API must serve its schema at `/openapi.json`. CI validates the schema using Spectral with the configured ruleset. Schema drift is caught via contract tests that validate responses against the schema.
+Every API must serve its schema at a documented, well-known path. CI validates the schema using Spectral with the configured ruleset. Schema drift is caught via contract tests that validate responses against the schema.
 
 ## Pros and Cons of the Options
 

@@ -7,7 +7,7 @@ tags: [aws, cdk, tagging, governance, cost]
 
 ## Directive
 
-All AWS resources must be tagged with `x:service`, `x:environment`, `x:owner`, and `x:managed-by` using `cdk.Tags.of(this)` at the stack level.
+All AWS resources must be tagged with `x:repo`, `x:service`, and `x:env` using `cdk.Tags.of(this)` at the stack level. Additional tags may be added as needed.
 
 ## Context and Problem Statement
 
@@ -43,10 +43,9 @@ export class MyStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    cdk.Tags.of(this).add('x:repo', 'my-repo');
     cdk.Tags.of(this).add('x:service', 'payments');
-    cdk.Tags.of(this).add('x:environment', 'production');
-    cdk.Tags.of(this).add('x:owner', 'platform-team');
-    cdk.Tags.of(this).add('x:managed-by', 'cdk');
+    cdk.Tags.of(this).add('x:env', 'production');
   }
 }
 ```
@@ -55,10 +54,18 @@ Required tags for all resources:
 
 All custom tag keys are prefixed with `x:`. The prefix serves two purposes: it groups custom tags together alphabetically in the AWS console (sorting after AWS-generated tags), and it makes custom tags visually distinct from tags applied by AWS services.
 
+Required tags:
+
 | Tag | Description | Example |
 |---|---|---|
+| `x:repo` | Source repository for this stack | `my-repo`, `platform-infra` |
 | `x:service` | The service or application this resource belongs to | `payments`, `auth`, `data-pipeline` |
-| `x:environment` | Deployment environment | `production`, `staging`, `development` |
+| `x:env` | Deployment environment | `production`, `staging`, `development` |
+
+Additional tags (optional, as needed):
+
+| Tag | Description | Example |
+|---|---|---|
 | `x:owner` | Team or individual responsible for the resource | `platform-team`, `data-eng` |
 | `x:managed-by` | Deployment mechanism | `cdk` |
 
