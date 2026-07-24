@@ -7,17 +7,17 @@ tags: [typescript, style, conventions]
 
 ## Directive
 
-All TypeScript styling decisions not covered by the formatter must follow the Google TypeScript Style Guide. Biome takes precedence where its rules conflict.
+All TypeScript styling decisions not covered by the formatter must follow the Google TypeScript Style Guide. ESLint and Prettier take precedence where their rules conflict.
 
 ## Context and Problem Statement
 
-Biome handles formatting and a broad set of lint rules, but does not cover every stylistic decision — naming conventions, type annotation style, use of language features, and code organisation are all left to the developer. Without a reference standard for these cases, engineers make inconsistent choices across services that accumulate into a codebase with no coherent style.
+ESLint and Prettier handle formatting and a broad set of lint rules, but do not cover every stylistic decision — naming conventions, type annotation style, use of language features, and code organisation are all left to the developer. Without a reference standard for these cases, engineers make inconsistent choices across services that accumulate into a codebase with no coherent style.
 
 ## Decision Drivers
 
 * Stylistic decisions not enforced by tooling must have a documented answer
 * The style guide must be TypeScript-first, not a JavaScript guide adapted for TypeScript
-* The guide must not conflict with Biome's formatting and lint rules
+* The guide must not conflict with ESLint's and Prettier's formatting and lint rules
 * The guide must be publicly available and well-maintained so it can be linked to directly
 
 ## Considered Options
@@ -28,11 +28,11 @@ Biome handles formatting and a broad set of lint rules, but does not cover every
 
 ## Decision Outcome
 
-Chosen option: "Google TypeScript Style Guide", because it is written specifically for TypeScript, is comprehensive, actively maintained, and covers the areas Biome does not — naming, type annotations, language feature usage, and module organisation.
+Chosen option: "Google TypeScript Style Guide", because it is written specifically for TypeScript, is comprehensive, actively maintained, and covers the areas ESLint and Prettier do not — naming, type annotations, language feature usage, and module organisation.
 
 ### Examples
 
-A few representative rules from the guide that Biome does not enforce:
+A few representative rules from the guide that ESLint does not enforce:
 
 **Naming conventions** — use `camelCase` for variables and functions, `PascalCase` for classes and types, `SCREAMING_SNAKE_CASE` for module-level constants:
 
@@ -68,14 +68,14 @@ function handle(value: unknown) {
 
 ### Consequences
 
-* Good, because engineers have a documented answer for stylistic questions not covered by Biome
+* Good, because engineers have a documented answer for stylistic questions not covered by ESLint or Prettier
 * Good, because the guide is TypeScript-first and covers the language deeply
 * Good, because it is publicly available — teams can link to specific rules rather than explaining them verbally
 * Bad, because not all rules in the guide are enforceable by tooling — adherence relies on code review
 
 ### Confirmation
 
-The Google TypeScript Style Guide is the reference for code review discussions about style not covered by Biome. Link to the relevant section of the guide when raising style feedback.
+The Google TypeScript Style Guide is the reference for code review discussions about style not covered by ESLint or Prettier. Link to the relevant section of the guide when raising style feedback.
 
 ## Pros and Cons of the Options
 
@@ -84,7 +84,7 @@ The Google TypeScript Style Guide is the reference for code review discussions a
 * Good, because TypeScript-first — written for TypeScript, not adapted from JavaScript
 * Good, because comprehensive coverage of naming, types, and language features
 * Good, because actively maintained by Google
-* Bad, because some rules overlap with or are superseded by Biome — requires knowing which takes precedence
+* Bad, because some rules overlap with or are superseded by ESLint/Prettier — requires knowing which takes precedence
 
 ### Airbnb Style Guide
 
@@ -101,4 +101,5 @@ The Google TypeScript Style Guide is the reference for code review discussions a
 ## More Information
 
 * [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html)
-* Related: [ADR-TS-0001 — Use Biome](ADR-TS-0001-use-biome.md)
+* Related: [ADR-TS-0001 — Use ESLint](ADR-TS-0001-use-linter.md)
+* Related: [ADR-TS-0013 — Use Prettier](ADR-TS-0013-use-formatter.md)

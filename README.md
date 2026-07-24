@@ -24,7 +24,7 @@ Examples: `aws/`, `typescript/` (code: `TS`), `python/` (code: `PY`)
 - Kebab-case slug matching the document title
 - Examples:
   - `aws/ADR-AWS-0001-use-cdk.md`
-  - `typescript/ADR-TS-0001-use-biome.md`
+  - `typescript/ADR-TS-0004-use-pnpm.md`
 
 ## Frontmatter
 

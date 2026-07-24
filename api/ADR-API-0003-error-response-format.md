@@ -1,17 +1,17 @@
 ---
 status: accepted
 date: 2026-05-16
-tags: [api, errors, rfc7807, http]
+tags: [api, errors, rfc9457, http]
 ---
 # Error Response Format
 
 ## Directive
 
-All error responses must use RFC 7807 Problem Details format with `Content-Type: application/problem+json`. Every error response must include `type`, `title`, `status`, and `detail` fields.
+All error responses must use RFC 9457 Problem Details format with `Content-Type: application/problem+json`. Every error response must include `type`, `title`, `status`, and `detail` fields. `type` URIs do not need to be HTTP-resolvable.
 
 ## Context and Problem Statement
 
-APIs must return errors in a consistent, machine-readable format so that clients can handle failures predictably. Without a standard, teams invent their own error shapes, leading to inconsistency across services and increased client integration effort. RFC 7807 defines a standard "Problem Details" format for HTTP error responses that is widely understood and tooling-friendly.
+APIs must return errors in a consistent, machine-readable format so that clients can handle failures predictably. Without a standard, teams invent their own error shapes, leading to inconsistency across services and increased client integration effort. RFC 9457 (which obsoletes RFC 7807) defines a standard "Problem Details" format for HTTP error responses that is widely understood and tooling-friendly.
 
 ## Decision Drivers
 
@@ -22,13 +22,13 @@ APIs must return errors in a consistent, machine-readable format so that clients
 
 ## Considered Options
 
-* RFC 7807 Problem Details
+* RFC 9457 Problem Details
 * Bespoke JSON error envelope
 * GraphQL-style error array
 
 ## Decision Outcome
 
-Chosen option: "RFC 7807 Problem Details", because it is an IETF standard with broad tooling support that provides a structured, extensible error format without requiring custom conventions.
+Chosen option: "RFC 9457 Problem Details", because it is an IETF standard with broad tooling support that provides a structured, extensible error format without requiring custom conventions.
 
 ### Examples
 
@@ -75,7 +75,7 @@ All error responses must use `Content-Type: application/problem+json` and includ
 
 ## Pros and Cons of the Options
 
-### RFC 7807 Problem Details
+### RFC 9457 Problem Details
 
 * Good, because IETF standard with broad tooling and framework support
 * Good, because extensible without breaking the base format
@@ -97,4 +97,4 @@ All error responses must use `Content-Type: application/problem+json` and includ
 
 ## More Information
 
-* [RFC 7807 — Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc7807)
+* [RFC 9457 — Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457) (obsoletes RFC 7807)

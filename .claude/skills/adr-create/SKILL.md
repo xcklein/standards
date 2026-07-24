@@ -49,7 +49,7 @@ Ask the following questions **one at a time**. Do not ask the next question unti
 3. Combine: `{category}/ADR-{CODE}-{NNNN}-{slug}.md`
 
 Examples:
-- "Use Biome for Linting" in `typescript` (code `TS`) → `typescript/ADR-TS-0001-use-biome-for-linting.md`
+- "Use Prisma for the ORM" in `typescript` (code `TS`) → `typescript/ADR-TS-0014-use-prisma-for-the-orm.md`
 - "Use S3 for Static Assets" in `aws` (code `AWS`) → `aws/ADR-AWS-0001-use-s3-for-static-assets.md`
 
 ## Step 5 — Write the file

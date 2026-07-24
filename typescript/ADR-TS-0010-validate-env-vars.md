@@ -76,7 +76,7 @@ const server = createServer({ port: config.PORT });
 
 ### Confirmation
 
-Direct `process.env` access outside the config module must be flagged in code review. A Biome lint rule or custom ESLint plugin can enforce this automatically if desired.
+Direct `process.env` access outside the config module must be flagged in code review. A custom ESLint rule (e.g. `no-restricted-properties`) can enforce this automatically if desired.
 
 ## Pros and Cons of the Options
 

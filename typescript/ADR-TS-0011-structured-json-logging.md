@@ -92,7 +92,7 @@ export const logger: Logger = pino({ name: config.SERVICE_NAME });
 
 ### Confirmation
 
-`console.log`, `console.error`, `console.warn`, and `console.info` must not appear in application code. Biome's `noConsole` rule enforces this automatically when enabled.
+`console.log`, `console.error`, `console.warn`, and `console.info` must not appear in application code. ESLint's `no-console` rule enforces this automatically when enabled.
 
 ## Pros and Cons of the Options
 
@@ -118,6 +118,6 @@ export const logger: Logger = pino({ name: config.SERVICE_NAME });
 
 ## More Information
 
-* Related: [ADR-TS-0010 — Validate Environment Variables with Zod](ADR-TS-0010-validate-env-vars.md)
+* Related: [ADR-TS-0010 — Validate Environment Variables at Startup](ADR-TS-0010-validate-env-vars.md)
 * [pino documentation](https://getpino.io)
 * [winston documentation](https://github.com/winstonjs/winston)

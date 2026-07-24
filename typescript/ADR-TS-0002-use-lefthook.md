@@ -7,7 +7,7 @@ tags: [typescript, tooling, git, pre-commit]
 
 ## Directive
 
-All TypeScript projects must use Lefthook for Git hooks. A `lefthook.yml` must be present at the project root. At minimum it must run `biome check --write` on staged files via a `pre-commit` hook and enforce commit message format via a `commit-msg` hook (see ADR-GIT-0001).
+All TypeScript projects must use Lefthook for Git hooks. A `lefthook.yml` must be present at the project root. At minimum it must run `eslint --fix` and `prettier --write` on staged files via a `pre-commit` hook and enforce commit message format via a `commit-msg` hook (see ADR-GIT-0001).
 
 ## Context and Problem Statement
 
@@ -35,9 +35,13 @@ Add a `lefthook.yml` at the repository root:
 ```yaml
 pre-commit:
   commands:
-    biome:
+    eslint:
       glob: "*.{ts,tsx,js,jsx}"
-      run: npx @biomejs/biome check --write {staged_files}
+      run: npx eslint --fix {staged_files}
+      stage_fixed: true
+    prettier:
+      glob: "*.{ts,tsx,js,jsx,json,md}"
+      run: npx prettier --write {staged_files}
       stage_fixed: true
 
 commit-msg:
@@ -46,7 +50,7 @@ commit-msg:
       run: pnpm commitlint --edit {1}
 ```
 
-`stage_fixed: true` ensures files auto-fixed by Biome are re-staged automatically before the commit completes. The `commit-msg` hook enforces the Conventional Commits format on every commit (see ADR-GIT-0001).
+`stage_fixed: true` ensures files auto-fixed by ESLint or Prettier are re-staged automatically before the commit completes. The `commit-msg` hook enforces the Conventional Commits format on every commit (see ADR-GIT-0001).
 
 ### Consequences
 
@@ -54,7 +58,7 @@ commit-msg:
 * Good, because agent-written code is validated before entering version control
 * Good, because hook configuration is version-controlled and consistent across all contributors
 * Good, because Lefthook has no Node.js runtime dependency — works in any repo
-* Good, because `stage_fixed: true` automatically re-stages files fixed by Biome
+* Good, because `stage_fixed: true` automatically re-stages files fixed by ESLint/Prettier
 * Bad, because developers must install Lefthook locally for hooks to run
 * Bad, because hooks can be bypassed with `git commit --no-verify`
 
@@ -79,5 +83,6 @@ commit-msg:
 
 ## More Information
 
-* Related: [ADR-TS-0001 — Use Biome](ADR-TS-0001-use-biome.md)
+* Related: [ADR-TS-0001 — Use ESLint](ADR-TS-0001-use-linter.md)
+* Related: [ADR-TS-0013 — Use Prettier](ADR-TS-0013-use-formatter.md)
 * Related: [ADR-GIT-0001 — Use Conventional Commits](../git/ADR-GIT-0001-conventional-commits.md)

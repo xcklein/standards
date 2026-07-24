@@ -68,7 +68,7 @@ import { foo } from './foo.js';
 
 ### Confirmation
 
-`tsconfig.json` must set `"module": "NodeNext"` and `"moduleResolution": "NodeNext"`. `package.json` must include `"type": "module"`. Enforced via Biome and code review.
+`tsconfig.json` must set `"module": "NodeNext"` and `"moduleResolution": "NodeNext"`. `package.json` must include `"type": "module"`. Enforced via ESLint and code review.
 
 ## Pros and Cons of the Options
 
