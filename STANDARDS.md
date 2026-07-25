@@ -50,6 +50,13 @@ A flat index of all active standards, grouped by category. Each entry links to t
 | [ADR-DB-0001](database/ADR-DB-0001-internal-column-prefix.md) | Internal Column Prefix | All internal database columns (lifecycle timestamps, soft-delete markers) must be prefixed with `_`. Every table must include `_created_at`, `_updated_at`, and `_deleted_at`. |
 | [ADR-DB-0002](database/ADR-DB-0002-prefer-soft-deletes.md) | Prefer Soft Deletes | All delete operations must set `_deleted_at` rather than removing the row. All active-record queries must filter `WHERE _deleted_at IS NULL`. Hard deletes are not permitted without an explicit service-level ADR. |
 
+## Documentation
+
+| ID | Title | Directive |
+|----|-------|-----------|
+| [ADR-DOCS-0001](documentation/ADR-DOCS-0001-doc-comments.md) | Doc Comments | All exported/public functions, classes, methods, and types must have a documentation comment (JSDoc, Javadoc, or the language's equivalent). Doc comments must describe purpose, parameters, return values, and thrown/rejected errors where applicable. |
+| [ADR-DOCS-0002](documentation/ADR-DOCS-0002-inline-comments.md) | Inline Comments | Inline code comments must be used sparingly. They are permitted only to explain unexpected or non-obvious behavior, or to explicitly note the deliberate absence of something (e.g., a `catch` block with no `throw`). Comments must not restate what the code already says. |
+
 ## Git
 
 | ID | Title | Directive |
