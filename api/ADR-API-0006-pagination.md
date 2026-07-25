@@ -7,7 +7,7 @@ tags: [api, pagination, http]
 
 ## Directive
 
-All collection endpoints must use cursor-based pagination. Offset-based pagination is not permitted. Responses must include a `pagination` object and `Link` headers.
+All collection endpoints must use cursor-based pagination. Offset-based pagination is not permitted. Responses must include a `pagination` object and `Link` headers. Field casing within that object is not prescribed here — follow [ADR-API-0007](ADR-API-0007-naming-conventions.md).
 
 ## Context and Problem Statement
 
@@ -32,7 +32,7 @@ Chosen option: "Cursor-based pagination", because it provides stable results reg
 
 ### Examples
 
-Response envelope with pagination metadata:
+Response envelope with pagination metadata. Field casing here follows [ADR-API-0007](ADR-API-0007-naming-conventions.md) (camelCase); this ADR does not prescribe its own casing:
 
 ```json
 {
@@ -41,10 +41,10 @@ Response envelope with pagination metadata:
     { "id": "01HABC", "name": "Bob" }
   ],
   "pagination": {
-    "next_cursor": "01HABC",
-    "has_next": true,
-    "has_previous": true,
-    "prev_cursor": "01HXYZ"
+    "nextCursor": "01HABC",
+    "hasNext": true,
+    "hasPrevious": true,
+    "prevCursor": "01HXYZ"
   }
 }
 ```
