@@ -7,7 +7,7 @@ tags: [api, openapi, documentation, tooling]
 
 ## Directive
 
-Every API must serve an OpenAPI 3.1 schema at a well-known path (e.g. `/openapi.json`). The schema must be validated with Spectral in CI.
+Every API must serve an OpenAPI 3.1 schema at a well-known path (e.g. `/openapi.json`). The schema must be validated with Spectral in CI, and the ruleset must extend `spectral:oas` — this is required. Extending `spectral:owasp` as well is recommended but not required. `spectral:owasp` alone is not sufficient on its own: it is an additive security ruleset and does not include the baseline `spectral:oas` structural rules.
 
 ## Context and Problem Statement
 
@@ -73,18 +73,28 @@ components:
           $ref: '#/components/schemas/Pagination'
 ```
 
+Every project must include a `.spectral.yaml` at the root. `spectral:oas` is required; `spectral:owasp` is recommended:
+
+```yaml
+extends:
+  - spectral:oas
+  - spectral:owasp # recommended, not required
+```
+
 ### Consequences
 
 * Good, because the schema is the authoritative contract — documentation and clients are always derived from it
 * Good, because client SDKs can be generated in any language from the schema
 * Good, because Spectral and similar tools can lint the schema for convention compliance
 * Good, because interactive documentation (Scalar, Swagger UI) is available for free
+* Good, because `spectral:oas` catches structural/schema errors that `spectral:owasp` does not check for
+* Good, because projects may adopt `spectral:owasp` for additional security linting without it being a hard gate
 * Bad, because maintaining a schema alongside the implementation requires discipline to avoid drift
 * Bad, because code-first approaches can produce verbose or incomplete schemas if annotations are missed
 
 ### Confirmation
 
-Every API must serve its schema at a documented, well-known path. CI validates the schema using Spectral with the configured ruleset. Schema drift is caught via contract tests that validate responses against the schema.
+Every API must serve its schema at a documented, well-known path. CI validates the schema using Spectral with a `.spectral.yaml` that extends `spectral:oas`. A CI check must fail if `spectral:oas` is missing from the ruleset; `spectral:owasp` is recommended but its absence does not fail CI. Schema drift is caught via contract tests that validate responses against the schema.
 
 ## Pros and Cons of the Options
 

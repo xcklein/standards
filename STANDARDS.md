@@ -35,7 +35,7 @@ A flat index of all active standards, grouped by category. Each entry links to t
 | ID | Title | Directive |
 |----|-------|-----------|
 | [ADR-API-0001](api/ADR-API-0001-prefer-rest.md) | Prefer REST | All new external-facing APIs must follow REST conventions over HTTP. Deviations (GraphQL, gRPC, tRPC) must be documented and justified in a service-level ADR. |
-| [ADR-API-0002](api/ADR-API-0002-openapi-schema.md) | OpenAPI Schema | Every API must serve an OpenAPI 3.1 schema at a well-known path (e.g. `/openapi.json`). The schema must be validated with Spectral in CI. |
+| [ADR-API-0002](api/ADR-API-0002-openapi-schema.md) | OpenAPI Schema | Every API must serve an OpenAPI 3.1 schema at a well-known path (e.g. `/openapi.json`). The schema must be validated with Spectral in CI; the ruleset must extend `spectral:oas` (required) and should extend `spectral:owasp` (recommended). |
 | [ADR-API-0003](api/ADR-API-0003-error-response-format.md) | Error Response Format | All error responses must use RFC 9457 Problem Details format with `Content-Type: application/problem+json`. Every error response must include `type`, `title`, `status`, and `detail` fields. `type` URIs do not need to be HTTP-resolvable. |
 | [ADR-API-0004](api/ADR-API-0004-authentication.md) | Authentication | All protected API endpoints must require a JWT bearer token issued via OAuth 2.0. Tokens must be signed with RS256 and verified against the issuer's public key. Expiry must be enforced. |
 | [ADR-API-0005](api/ADR-API-0005-versioning-strategy.md) | Versioning Strategy | All API routes must include a version prefix (`/v{n}/`). Deprecated versions must respond with `Deprecation` and `Sunset` headers. |
