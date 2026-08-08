@@ -29,6 +29,7 @@ A flat index of all active standards, grouped by category. Each entry links to t
 | [ADR-TS-0011](typescript/ADR-TS-0011-structured-json-logging.md) | Structured JSON Logging | All application logs must be emitted as structured JSON. Every log entry must include `level`, `message`, `timestamp`, and `service`. `console.log`, `console.error`, and related methods must not be used in application code. |
 | [ADR-TS-0012](typescript/ADR-TS-0012-google-typescript-style-guide.md) | Follow Google TypeScript Style Guide | All TypeScript styling decisions not covered by the formatter must follow the Google TypeScript Style Guide. ESLint and Prettier take precedence where their rules conflict. |
 | [ADR-TS-0013](typescript/ADR-TS-0013-use-formatter.md) | Use Prettier | All TypeScript projects must use Prettier for formatting. Biome must not be used for formatting. Every project must include a `prettier.config.js` and stay as close to Prettier's defaults as possible — `tabWidth` and `printWidth` are the only settings most projects should need to override. |
+| [ADR-TS-0014](typescript/ADR-TS-0014-defining-errors.md) | Defining Errors | Errors must be defined as custom classes extending `Error`, one class per error type. When a module emits multiple related error types, define a custom base error class extending `Error`, then extend that base class for each specific error. Error classes may carry custom fields for additional context. A single error class with a `code` field to differentiate error scenarios is not supported. |
 
 ## API
 
