@@ -56,6 +56,7 @@ A flat index of all active standards, grouped by category. Each entry links to t
 |----|-------|-----------|
 | [ADR-DOCS-0001](documentation/ADR-DOCS-0001-doc-comments.md) | Doc Comments | All exported/public functions, classes, methods, and types must have a documentation comment (JSDoc, Javadoc, or the language's equivalent). Doc comments must describe purpose, parameters, return values, and thrown/rejected errors where applicable. |
 | [ADR-DOCS-0002](documentation/ADR-DOCS-0002-inline-comments.md) | Inline Comments | Inline code comments must be used sparingly. They are permitted only to explain unexpected or non-obvious behavior, or to explicitly note the deliberate absence of something (e.g., a `catch` block with no `throw`). Comments must not restate what the code already says. |
+| [ADR-DOCS-0003](documentation/ADR-DOCS-0003-tests-over-comments.md) | Tests Over Comments | When code is hardened against a specific edge case, regression, or an ambiguous requirement, that knowledge must be encoded as a unit test rather than as an inline comment. Tests are executable and fail when the behavior they protect regresses; comments are inert prose that can go stale, be ignored, or drift out of sync with the code. |
 
 ## Git
 
