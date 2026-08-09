@@ -30,6 +30,7 @@ A flat index of all active standards, grouped by category. Each entry links to t
 | [ADR-TS-0012](typescript/ADR-TS-0012-google-typescript-style-guide.md) | Follow Google TypeScript Style Guide | All TypeScript styling decisions not covered by the formatter must follow the Google TypeScript Style Guide. ESLint and Prettier take precedence where their rules conflict. |
 | [ADR-TS-0013](typescript/ADR-TS-0013-use-formatter.md) | Use Prettier | All TypeScript projects must use Prettier for formatting. Biome must not be used for formatting. Every project must include a `prettier.config.js` and stay as close to Prettier's defaults as possible — `tabWidth` and `printWidth` are the only settings most projects should need to override. |
 | [ADR-TS-0014](typescript/ADR-TS-0014-defining-errors.md) | Defining Errors | Errors must be defined as custom classes extending `Error`, one class per error type. When a module emits multiple related error types, define a custom base error class extending `Error`, then extend that base class for each specific error. Error classes may carry custom fields for additional context. A single error class with a `code` field to differentiate error scenarios is not supported. |
+| [ADR-TS-0015](typescript/ADR-TS-0015-defining-enums.md) | Defining Enums | Enums must be defined as a `const` object with `as const`, paired with a derived type of the same name using `(typeof X)[keyof typeof X]`. TypeScript's `enum` and `const enum` keywords must not be used. |
 
 ## API
 
