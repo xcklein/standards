@@ -7,7 +7,7 @@ tags: [documentation, style, code-review]
 
 ## Directive
 
-Inline code comments must be used sparingly. They are permitted only to explain unexpected or non-obvious behavior, or to explicitly note the deliberate absence of something (e.g., a `catch` block with no `throw`). Comments must not restate what the code already says.
+Inline code comments must be used sparingly. They are permitted only to explain unexpected or non-obvious behavior, or to explicitly note the deliberate absence of something (e.g., a `catch` block with no `throw`). Comments must not restate what the code already says. An inline comment should be limited to about three lines. If that is not enough to explain the situation, create a separate supporting document and reference it from the comment rather than letting the comment grow indefinitely. Inline comments must never reference git commits, branches, pull requests, or issues/tickets — only source-controlled documentation (in this repository or another repository).
 
 ## Context and Problem Statement
 
@@ -19,6 +19,8 @@ Inline comments are not enforced by the compiler or tests and can drift out of s
 * Unenforced comments can silently drift out of sync with the code they describe
 * Genuinely surprising behavior must be explained once, at the point of surprise, to prevent future regressions
 * Deliberate omissions (no `throw`, no `default` case, no `return`) are indistinguishable from bugs unless explicitly marked as intentional
+* An inline comment must stay short enough to read in place without breaking the reader's flow through the surrounding code; an explanation that needs more room belongs in a separate document, not a sprawling comment block
+* A reference in an inline comment must remain resolvable to anyone with just the codebase — commits, branches, and PR/issue numbers depend on an external tracker's retention and access policy, while source-controlled documentation does not
 
 ## Considered Options
 
@@ -46,7 +48,14 @@ Good — explains genuinely non-obvious behavior:
 
 ```typescript
 // Retry once before failing: the upstream API occasionally drops the
-// first connection after a cold start (see INC-4821).
+// first connection after a cold start (see docs/incidents/2026-06-cold-start.md).
+const response = await fetchWithRetry(url, { retries: 1 });
+```
+
+Bad — references a ticket instead of documentation:
+
+```typescript
+// Retry once before failing — see INC-4821.
 const response = await fetchWithRetry(url, { retries: 1 });
 ```
 
@@ -61,17 +70,35 @@ try {
 }
 ```
 
+Good — the explanation doesn't fit in three lines, so it links out instead of sprawling:
+
+```typescript
+// Merge order here matters — see docs/cart-reconciliation.md for why
+// server-wins-on-conflict was chosen over last-write-wins.
+const merged = reconcile(local, remote);
+```
+
+Good — a cross-repo documentation reference is allowed:
+
+```typescript
+// Kept for mobile Safari compatibility — see docs/browser-compat.md
+// in xcklein/olatile-www for the full history.
+const useLegacyLayout = true;
+```
+
 ### Consequences
 
 * Good, because every comment that exists carries real information, so comments are read and trusted rather than skimmed past
 * Good, because fewer comments means fewer opportunities for a comment to drift out of sync with the code
 * Good, because deliberate omissions are distinguished from bugs, preventing well-intentioned "fixes" that reintroduce a problem
+* Good, because capping comments at about three lines keeps them readable in place instead of interrupting the surrounding code with a wall of prose
+* Good, because referencing documentation instead of VCS metadata keeps every comment resolvable regardless of an external tracker's retention or renumbering
 * Bad, because relies on developer and reviewer judgment to identify what counts as "non-obvious"
 * Bad, because an author close to the problem may under-comment reasoning that is obvious to them but not to future readers
 
 ### Confirmation
 
-Code review must flag inline comments that restate the following line and request their removal, and must flag non-obvious logic or deliberate omissions left unexplained.
+Code review must flag inline comments that restate the following line and request their removal, must flag non-obvious logic or deliberate omissions left unexplained, and must flag comments that have grown past about three lines or that reference a commit, branch, or PR/issue number, asking for a linked supporting document instead.
 
 ## Pros and Cons of the Options
 
