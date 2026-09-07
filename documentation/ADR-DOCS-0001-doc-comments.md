@@ -7,7 +7,7 @@ tags: [documentation, jsdoc, javadoc, style]
 
 ## Directive
 
-All exported/public functions, classes, methods, and types must have a documentation comment (JSDoc, Javadoc, or the language's equivalent). Doc comments must describe purpose, parameters, return values, and thrown/rejected errors where applicable. The free-form description (excluding `@param`/`@returns`/`@throws` tags) should be limited to around a dozen lines. If that is not enough to explain the symbol, create a separate supporting document and reference it from the doc comment rather than letting the comment grow indefinitely. Doc comments must never reference git commits, branches, pull requests, or issues/tickets — only source-controlled documentation (in this repository or another repository).
+All exported/public functions, classes, methods, and types must have a documentation comment (JSDoc, Javadoc, or the language's equivalent). Doc comments must describe purpose, parameters, return values, and thrown/rejected errors where applicable. The free-form description (excluding `@param`/`@returns`/`@throws` tags) should be limited to around a dozen lines. If that is not enough to explain the symbol, create a separate supporting document and reference it from the doc comment rather than letting the comment grow indefinitely. Doc comments must never reference git commits, branches, pull requests, or issues/tickets — only source-controlled documentation (in this repository or another repository). A doc comment must let the code speak for itself wherever possible — favor a clearer name or signature over documenting something a reader could infer directly from the symbol. Doc comments must not make claims about the wider codebase (e.g., "the only caller of this is X", "every consumer already validates Y") — such claims cannot be verified by looking at the symbol alone and silently become false as other, unrelated code changes elsewhere without ever touching this comment.
 
 ## Context and Problem Statement
 
@@ -21,6 +21,8 @@ Public API surfaces are consumed by other developers, other services, and AI cod
 * Documentation colocated with code is far less likely to drift out of sync than a separate docs site or wiki
 * A doc comment must stay short enough to read at a glance in an editor tooltip or hover card; a description that has grown into a multi-page explanation belongs in a separate document, not an ever-expanding comment block
 * A reference in a doc comment must remain resolvable to anyone with just the codebase — commits, branches, and PR/issue numbers depend on an external tracker's retention and access policy, while source-controlled documentation does not
+* A comment that duplicates what a well-named symbol already conveys is maintenance burden with no added information
+* A claim about the wider codebase (every caller, every consumer, the only place something happens) is scoped far beyond what the comment sits next to, so nothing prompts an update to it when the rest of the codebase changes and the claim quietly becomes false
 
 ## Considered Options
 
@@ -105,6 +107,27 @@ Good — a cross-repo documentation reference is allowed:
 export function reconcileCart(local: Cart, remote: Cart): Cart { ... }
 ```
 
+Bad — makes an unverifiable claim about the wider codebase instead of describing the symbol itself:
+
+```typescript
+/**
+ * Formats a user's display name.
+ *
+ * This is the only place in the codebase that formats names, so any
+ * future name formatting should be added here.
+ */
+export function formatDisplayName(user: User): string { ... }
+```
+
+Good — describes the symbol, not the rest of the codebase:
+
+```typescript
+/**
+ * Formats a user's display name as "Last, First".
+ */
+export function formatDisplayName(user: User): string { ... }
+```
+
 ### Consequences
 
 * Good, because public APIs are self-documenting and understandable without reading the implementation
@@ -113,12 +136,13 @@ export function reconcileCart(local: Cart, remote: Cart): Cart { ... }
 * Good, because documentation colocated with code drifts out of sync far less than external docs
 * Good, because capping description length keeps doc comments quick to read in an editor tooltip instead of growing into unreadable blocks
 * Good, because referencing documentation instead of VCS metadata keeps every doc comment resolvable regardless of an external tracker's retention or renumbering
+* Good, because letting the code speak for itself and avoiding wider-codebase claims keeps doc comments scoped to what they sit next to, so they stay true as the rest of the codebase changes
 * Bad, because doc comments add maintenance overhead when signatures change
 * Bad, because doc comments can still go stale if not enforced in code review or tooling
 
 ### Confirmation
 
-A lint rule (e.g. `eslint-plugin-jsdoc`'s `require-jsdoc` for TypeScript, Checkstyle's `JavadocMethod` for Java) must flag exported/public symbols missing a doc comment. Code review is the fallback for languages without an equivalent lint rule, and must also flag doc comment descriptions that have grown well past a dozen lines, or that reference a commit, branch, or PR/issue number, asking for a linked supporting document instead.
+A lint rule (e.g. `eslint-plugin-jsdoc`'s `require-jsdoc` for TypeScript, Checkstyle's `JavadocMethod` for Java) must flag exported/public symbols missing a doc comment. Code review is the fallback for languages without an equivalent lint rule, and must also flag doc comment descriptions that have grown well past a dozen lines, that reference a commit, branch, or PR/issue number, that merely restate what a well-named symbol already conveys, or that make a claim about the wider codebase rather than about the symbol itself.
 
 ## Pros and Cons of the Options
 
