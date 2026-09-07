@@ -7,7 +7,7 @@ tags: [aws, cdk, tagging, governance, cost]
 
 ## Directive
 
-All AWS resources must be tagged with `x:repo`, `x:service`, and `x:env` using `cdk.Tags.of(this)` at the stack level. Additional tags may be added as needed.
+All AWS resources must be tagged with `x:repo`, `x:service`, and `x:env` using the CDK `Tags` API. Tags may be applied at the app level (`cdk.Tags.of(app)`) or per stack (`cdk.Tags.of(this)`) — both propagate to every resource in scope, and an app that tags once covers stacks added later without further edits. Additional tags may be added as needed.
 
 ## Context and Problem Statement
 
@@ -50,6 +50,17 @@ export class MyStack extends cdk.Stack {
 }
 ```
 
+Tagging the app instead covers every stack in one place, including stacks added
+later:
+
+```typescript
+const app = new cdk.App();
+
+cdk.Tags.of(app).add('x:repo', 'my-repo');
+cdk.Tags.of(app).add('x:service', 'payments');
+cdk.Tags.of(app).add('x:env', 'production');
+```
+
 Required tags for all resources:
 
 All custom tag keys are prefixed with `x:`. The prefix serves two purposes: it groups custom tags together alphabetically in the AWS console (sorting after AWS-generated tags), and it makes custom tags visually distinct from tags applied by AWS services.
@@ -80,7 +91,7 @@ Additional tags (optional, as needed):
 
 ### Confirmation
 
-cdk-nag's `AwsSolutionsChecks` flags untagged resources. Required tags are applied via `cdk.Tags.of(this)` at the stack level in every CDK stack. Tag key names and allowed values are enforced via a shared CDK construct library.
+cdk-nag's `AwsSolutionsChecks` flags untagged resources. Required tags are applied via the CDK `Tags` API at the app or stack level, such that every synthesised resource carries all three. Tag key names and allowed values are enforced via a shared CDK construct library.
 
 ## Pros and Cons of the Options
 

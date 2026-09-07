@@ -7,7 +7,7 @@ tags: [api, content-negotiation, http, json]
 
 ## Directive
 
-All API responses must use `Content-Type: application/json`. Error responses must use `Content-Type: application/problem+json`. File upload endpoints are the only exception and must use `multipart/form-data`.
+All API responses must use `Content-Type: application/json`. Error responses must use `Content-Type: application/problem+json`. Two exceptions: file upload endpoints must use `multipart/form-data`, and endpoints whose response body *is* a binary asset (an image, a PDF, an archive) must use that asset's own media type. An error raised by a binary endpoint still uses `application/problem+json` — the exemption covers the success body only, and it does not extend to wrapping structured data in a non-JSON type.
 
 ## Context and Problem Statement
 
@@ -77,7 +77,7 @@ Error responses use `application/problem+json` (see ADR-API-0001).
 
 ### Confirmation
 
-All non-file API responses must use `Content-Type: application/json` (or `application/problem+json` for errors). Enforced via OpenAPI schema validation and API contract tests.
+All API responses carrying structured data must use `Content-Type: application/json` (or `application/problem+json` for errors). Binary-asset and file-upload endpoints declare their own media type in the OpenAPI schema. Enforced via OpenAPI schema validation and API contract tests.
 
 ## Pros and Cons of the Options
 

@@ -7,7 +7,9 @@ tags: [api, pagination, http]
 
 ## Directive
 
-All collection endpoints must use cursor-based pagination. Offset-based pagination is not permitted. Responses must include a `pagination` object and `Link` headers. Field casing within that object is not prescribed here — follow [ADR-API-0007](ADR-API-0007-naming-conventions.md).
+All collection endpoints whose result set grows with usage must use cursor-based pagination. Offset-based pagination is not permitted. Responses must include a `pagination` object and `Link` headers. Field casing within that object is not prescribed here — follow [ADR-API-0007](ADR-API-0007-naming-conventions.md).
+
+A collection is exempt only when its size is bounded by something other than how much data users create — a fixed top-N ranking, an enum, or a catalogue whose length is set by configuration. The bound must be enforced in the handler and declared in the OpenAPI schema (e.g. `maxItems`), so the exemption is verifiable rather than assumed. A collection that is merely small today is not exempt.
 
 ## Context and Problem Statement
 
@@ -72,7 +74,7 @@ Link: <https://api.example.com/v1/users?cursor=01HXYZ&limit=20>; rel="prev"
 
 ### Confirmation
 
-All collection endpoints must return a `pagination` object and `Link` headers. Offset-based pagination is not permitted. Enforced via OpenAPI schema and API contract tests.
+All collection endpoints must return a `pagination` object and `Link` headers, unless the collection meets the bounded-size exemption above and declares that bound in its schema. Offset-based pagination is not permitted. Enforced via OpenAPI schema and API contract tests.
 
 ## Pros and Cons of the Options
 
