@@ -9,14 +9,18 @@ tags: [typescript, esm, modules, tooling]
 
 All TypeScript projects must use ESM, not CommonJS. `package.json` must include `"type": "module"`. The `tsconfig.json` module settings depend on how the project is run:
 
-* **Node-runtime projects** (APIs, CLIs, scripts run directly by Node) must set `"module": "NodeNext"` and `"moduleResolution": "NodeNext"`, and import paths must use explicit `.js` extensions.
+* **Node-runtime projects** (APIs, CLIs, scripts run directly by Node) must set `"module"` and `"moduleResolution"` to `"NodeNext"` (or `"Node16"`, which applies the same loader rules), and relative import paths must carry an explicit extension. Either spelling of that extension is acceptable:
+  * `.js` — the emitted path, written by hand.
+  * `.ts` — the real path, with `"allowImportingTsExtensions"` and `"rewriteRelativeImportExtensions"` set so TypeScript rewrites it to `.js` on emit. Requires TypeScript 5.7 or later.
 * **Bundler-driven frontend projects** (React via Vite, see [ADR-UI-0006](../ui/ADR-UI-0006-use-vite.md)) must set `"module": "ESNext"` and `"moduleResolution": "bundler"`, and import paths must **not** include file extensions.
+
+A project must pick one extension style and apply it consistently; mixing `.js` and `.ts` relative imports in the same project is not permitted.
 
 ## Context and Problem Statement
 
 JavaScript has two competing module systems: ECMAScript Modules (ESM) and CommonJS (CJS). ESM is the official standard defined by the ECMAScript specification and is natively supported by all modern runtimes and browsers. CommonJS is a legacy format introduced by Node.js before a standard existed. New projects should align with the standard module system to ensure long-term compatibility and access to modern language features.
 
-`NodeNext` module resolution enforces Node's own ESM loader rules — notably that relative imports must include an explicit file extension. Bundler-driven frontend tooling (Vite, and the `bundler` resolution mode built for it) does its own module resolution and expects extensionless imports; applying `NodeNext` rules to a Vite/React project produces incorrect import paths or fights the framework's own conventions. The choice of ESM over CJS is universal, but the mechanical tsconfig settings that enforce it are not — they must match how the code is actually loaded.
+`NodeNext` module resolution enforces Node's own ESM loader rules — notably that relative imports must include an explicit file extension. Historically that extension had to be written as `.js` even though the file on disk was `.ts`, which reads as a lie about the filesystem and breaks editor "go to file" on the literal path. TypeScript 5.7's `rewriteRelativeImportExtensions` removes that trade-off: source can import `./thing.ts` and the compiler rewrites it to `./thing.js` on emit. Both spellings satisfy Node's loader; the choice is a readability preference, so the standard permits either as long as a project is internally consistent. Bundler-driven frontend tooling (Vite, and the `bundler` resolution mode built for it) does its own module resolution and expects extensionless imports; applying `NodeNext` rules to a Vite/React project produces incorrect import paths or fights the framework's own conventions. The choice of ESM over CJS is universal, but the mechanical tsconfig settings that enforce it are not — they must match how the code is actually loaded.
 
 ## Decision Drivers
 
@@ -92,7 +96,7 @@ import { Foo } from './foo';
 
 ### Confirmation
 
-`package.json` must include `"type": "module"` in every project. Node-runtime projects must set `"module"`/`"moduleResolution": "NodeNext"` in `tsconfig.json`, with explicit `.js` extensions on relative imports. Bundler-driven frontend projects must set `"module": "ESNext"` / `"moduleResolution": "bundler"`, with no file extensions on relative imports. Enforced via ESLint and code review.
+`package.json` must include `"type": "module"` in every project. Node-runtime projects must set `"module"`/`"moduleResolution"` to `"NodeNext"` or `"Node16"` in `tsconfig.json`, with an explicit extension on every relative import — `.js`, or `.ts` alongside `"allowImportingTsExtensions"` and `"rewriteRelativeImportExtensions"`. Bundler-driven frontend projects must set `"module": "ESNext"` / `"moduleResolution": "bundler"`, with no file extensions on relative imports. Enforced via ESLint and code review.
 
 ## Pros and Cons of the Options
 

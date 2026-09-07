@@ -7,7 +7,7 @@ tags: [typescript, linting, tooling, react]
 
 ## Directive
 
-All TypeScript projects must use ESLint for linting. Biome must not be used for linting. Every project must include an `eslint.config.js` (flat config) following the standard configuration.
+All TypeScript projects must use ESLint for linting. Biome must not be used for linting. Every project must include a flat config at the project root, following the standard configuration. Any filename ESLint resolves natively is acceptable — `eslint.config.js`, `.mjs`, `.cjs`, or `.ts`; pick whichever the project's module type makes unambiguous.
 
 ## Context and Problem Statement
 

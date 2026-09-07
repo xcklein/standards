@@ -7,7 +7,7 @@ tags: [typescript, tooling, git, pre-commit]
 
 ## Directive
 
-All TypeScript projects must use Lefthook for Git hooks. A `lefthook.yml` must be present at the project root. At minimum it must run `eslint --fix` and `prettier --write` on staged files via a `pre-commit` hook and enforce commit message format via a `commit-msg` hook (see ADR-GIT-0001).
+All TypeScript projects must use Lefthook for Git hooks. A Lefthook config must be present at the project root, in any format Lefthook resolves natively (`lefthook.yml`, `.yaml`, `.json`, or `.toml`). At minimum it must run `eslint --fix` and `prettier --write` on staged files via a `pre-commit` hook and enforce commit message format via a `commit-msg` hook (see ADR-GIT-0001).
 
 ## Context and Problem Statement
 

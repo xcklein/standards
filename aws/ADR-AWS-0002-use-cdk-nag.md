@@ -7,7 +7,7 @@ tags: [aws, cdk, security, compliance]
 
 ## Directive
 
-Every CDK app entry point must apply `AwsSolutionsChecks` via `Aspects.of(app)`. The CDK synth step must fail on unsuppressed violations. All suppressions must include a `reason`.
+Every CDK app entry point must apply `AwsSolutionsChecks` to the whole app, via either `Aspects.of(app).add(...)` or `Validations.of(app).addPlugins(...)`. The CDK synth step must fail on unsuppressed violations. All suppressions must include a `reason`, whether written as `NagSuppressions` or as `Validations.of(scope).acknowledge(...)`.
 
 ## Context and Problem Statement
 
@@ -47,6 +47,21 @@ const stack = new MyStack(app, 'MyStack');
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 ```
 
+`Validations` is equally acceptable, and is the better fit where per-resource
+acknowledgement is needed — `acknowledge` scopes a suppression to the construct
+it is called on, without the path-matching that `NagSuppressions` requires:
+
+```typescript
+import { Validations } from 'aws-cdk-lib';
+
+Validations.of(app).addPlugins(new AwsSolutionsChecks(app, { verbose: true }));
+
+Validations.of(bucket).acknowledge(
+  'AwsSolutions-S1',
+  'Server access logging not required for this ephemeral bucket.',
+);
+```
+
 Suppress a rule where a violation is intentional and accepted:
 
 ```typescript
@@ -73,7 +88,7 @@ NagSuppressions.addResourceSuppressions(bucket, [
 
 ### Confirmation
 
-`AwsSolutionsChecks` must be applied via `Aspects.of(app)` in every CDK app entry point. CI runs `cdk synth` and fails the build on unsuppressed violations.
+`AwsSolutionsChecks` must be applied app-wide in every CDK app entry point, via `Aspects.of(app).add(...)` or `Validations.of(app).addPlugins(...)`. CI runs `cdk synth` and fails the build on unsuppressed violations. Code review must reject any suppression or acknowledgement without a reason.
 
 ## Pros and Cons of the Options
 
