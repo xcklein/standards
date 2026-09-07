@@ -7,7 +7,7 @@ tags: [documentation, style, code-review]
 
 ## Directive
 
-Inline code comments must be used sparingly. They are permitted only to explain unexpected or non-obvious behavior, or to explicitly note the deliberate absence of something (e.g., a `catch` block with no `throw`). Comments must not restate what the code already says. An inline comment should be limited to about three lines. If that is not enough to explain the situation, create a separate supporting document and reference it from the comment rather than letting the comment grow indefinitely. Inline comments must never reference git commits, branches, pull requests, or issues/tickets — only source-controlled documentation (in this repository or another repository).
+Inline code comments must be used sparingly. They are permitted only to explain unexpected or non-obvious behavior, or to explicitly note the deliberate absence of something (e.g., a `catch` block with no `throw`). Comments must not restate what the code already says. An inline comment should be limited to about three lines. If that is not enough to explain the situation, create a separate supporting document and reference it from the comment rather than letting the comment grow indefinitely. Inline comments must never reference git commits, branches, pull requests, or issues/tickets — only source-controlled documentation (in this repository or another repository). An inline comment must let the code speak for itself wherever possible — favor clearer code (naming, structure, extraction) over a comment explaining what confusing code does. Inline comments must not make claims about the wider codebase (e.g., "nothing else calls this with a negative number", "every other module already validates this") — such claims cannot be verified by looking at the code the comment sits next to, and silently become false as other, unrelated code changes elsewhere without ever touching this comment.
 
 ## Context and Problem Statement
 
@@ -21,6 +21,8 @@ Inline comments are not enforced by the compiler or tests and can drift out of s
 * Deliberate omissions (no `throw`, no `default` case, no `return`) are indistinguishable from bugs unless explicitly marked as intentional
 * An inline comment must stay short enough to read in place without breaking the reader's flow through the surrounding code; an explanation that needs more room belongs in a separate document, not a sprawling comment block
 * A reference in an inline comment must remain resolvable to anyone with just the codebase — commits, branches, and PR/issue numbers depend on an external tracker's retention and access policy, while source-controlled documentation does not
+* Confusing code explained by a comment is still confusing code; renaming or restructuring removes the need for the comment instead of just excusing it
+* A claim about the wider codebase (every caller, every other module, the only place something happens) is scoped far beyond the code the comment sits next to, so nothing prompts an update to it when the rest of the codebase changes and the claim quietly becomes false
 
 ## Considered Options
 
@@ -86,6 +88,22 @@ Good — a cross-repo documentation reference is allowed:
 const useLegacyLayout = true;
 ```
 
+Bad — a comment papering over confusing code, plus an unverifiable claim about the wider codebase:
+
+```typescript
+// n is always positive here since no caller in the codebase passes
+// a negative number
+const bucket = buckets[n % buckets.length];
+```
+
+Good — the code is restructured so the comment (and the assumption) isn't needed:
+
+```typescript
+function bucketFor(n: NonNegativeInt): Bucket {
+  return buckets[n % buckets.length];
+}
+```
+
 ### Consequences
 
 * Good, because every comment that exists carries real information, so comments are read and trusted rather than skimmed past
@@ -93,12 +111,13 @@ const useLegacyLayout = true;
 * Good, because deliberate omissions are distinguished from bugs, preventing well-intentioned "fixes" that reintroduce a problem
 * Good, because capping comments at about three lines keeps them readable in place instead of interrupting the surrounding code with a wall of prose
 * Good, because referencing documentation instead of VCS metadata keeps every comment resolvable regardless of an external tracker's retention or renumbering
+* Good, because letting the code speak for itself and avoiding wider-codebase claims pushes authors to fix confusing code rather than excuse it, and keeps comments true as the rest of the codebase changes
 * Bad, because relies on developer and reviewer judgment to identify what counts as "non-obvious"
 * Bad, because an author close to the problem may under-comment reasoning that is obvious to them but not to future readers
 
 ### Confirmation
 
-Code review must flag inline comments that restate the following line and request their removal, must flag non-obvious logic or deliberate omissions left unexplained, and must flag comments that have grown past about three lines or that reference a commit, branch, or PR/issue number, asking for a linked supporting document instead.
+Code review must flag inline comments that restate the following line and request their removal, must flag non-obvious logic or deliberate omissions left unexplained, must flag comments that have grown past about three lines or that reference a commit, branch, or PR/issue number (asking for a linked supporting document instead), and must flag comments that only exist to explain otherwise-confusing code (asking for a rename or restructure instead) or that make a claim about the wider codebase rather than about the code the comment sits next to.
 
 ## Pros and Cons of the Options
 
