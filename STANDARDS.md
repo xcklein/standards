@@ -67,6 +67,12 @@ A flat index of all active standards, grouped by category. Each entry links to t
 |----|-------|-----------|
 | [ADR-GIT-0001](git/ADR-GIT-0001-conventional-commits.md) | Use Conventional Commits | All commits must follow the Conventional Commits specification. The format is `<type>[optional scope]: <description>`. Breaking changes must be indicated with `!` after the type or a `BREAKING CHANGE:` footer. |
 
+## Testing
+
+| ID | Title | Directive |
+|----|-------|-----------|
+| [ADR-TEST-0001](testing/ADR-TEST-0001-test-behavior-not-arbitrary-values.md) | Test Behavior, Not Arbitrary Values | Unit tests must validate behavior that is actually required — business rules, contracts, and edge cases that matter — not arbitrary or incidental implementation values that happen to be true today. A value should only be pinned in a test if something actually mandates that value. Unit tests must also never duplicate checks that a linter, type checker, schema validator, or other static/validation tool already enforces. |
+
 ## UI
 
 | ID | Title | Directive |
