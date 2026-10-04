@@ -51,28 +51,18 @@ Split stacks by concern and lifecycle, keeping stateful resources (secrets, log 
 `infra/app.ts` — one app, all environment differences in one config object:
 
 ```typescript
-import { App, Tags } from "aws-cdk-lib";
-import { ComputeStack } from "./stacks/compute-stack.ts";
-import { SecretStack } from "./stacks/secret-stack.ts";
-
-interface EnvConfig {
-  domain: string;
-  wafRateLimit: number;
-  budgetLimitUsd: number;
-}
+import { App, Stack, Tags } from "aws-cdk-lib";
 
 const CONFIG = {
-  staging: { domain: "staging.olatile.com", wafRateLimit: 200, budgetLimitUsd: 20 },
-  prod: { domain: "olatile.com", wafRateLimit: 1000, budgetLimitUsd: 100 },
-} satisfies Record<string, EnvConfig>;
+  staging: { domain: "staging.example.com" },
+  prod: { domain: "example.com" },
+};
 
 const app = new App();
 
-const envName: unknown = app.node.tryGetContext("env");
-if (typeof envName !== "string" || !Object.hasOwn(CONFIG, envName)) {
-  throw new Error(
-    `Unknown env "${String(envName)}"; pass -c env=<${Object.keys(CONFIG).join("|")}>`,
-  );
+const envName = app.node.tryGetContext("env");
+if (!Object.hasOwn(CONFIG, envName)) {
+  throw new Error(`Unknown env "${envName}"`);
 }
 const config = CONFIG[envName as keyof typeof CONFIG];
 
@@ -81,18 +71,14 @@ const env = {
   region: process.env.CDK_DEFAULT_REGION,
 };
 
-const secrets = new SecretStack(app, "ApiSecretStack", { env });
-const compute = new ComputeStack(app, "ApiComputeStack", { env, ...config });
-compute.addDependency(secrets);
+new Stack(app, "ApiComputeStack", { env, description: `API for ${config.domain}` });
 
-Tags.of(app).add("x:repo", "https://github.com/xcklein/olatile-api");
-Tags.of(app).add("x:service", "olatile-api");
 Tags.of(app).add("x:env", envName);
 
 app.synth();
 ```
 
-Stack IDs are `ApiSecretStack` and `ApiComputeStack` in every account; nothing in the stacks branches on `envName`.
+The stack ID is `ApiComputeStack` in every account; only `config` varies by environment.
 
 Deploying — the environment is chosen at dispatch, and each GitHub Environment holds that account's role and region:
 
