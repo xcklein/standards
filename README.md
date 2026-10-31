@@ -46,7 +46,7 @@ Copy `templates/ADR-TEMPLATE.md`, rename it following the convention above, and 
 If using Claude Code with the `ck` plugin from [xcklein/claude-plugins](https://github.com/xcklein/claude-plugins), run:
 
 ```
-/ck:adr-create
+/ck:standards-create
 ```
 
 ## Reference
