@@ -43,10 +43,10 @@ superseded-by: ADR-NNNN-<slug>   # only when status: superseded
 
 Copy `templates/ADR-TEMPLATE.md`, rename it following the convention above, and fill in the sections.
 
-If using Claude Code, invoke the `adr-create` skill (`.claude/skills/adr-create/SKILL.md`):
+If using Claude Code with the `ck` plugin from [xcklein/claude-plugins](https://github.com/xcklein/claude-plugins), run:
 
 ```
-/adr-create
+/ck:adr-create
 ```
 
 ## Reference
