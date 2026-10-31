@@ -54,7 +54,7 @@ Split stacks by concern and lifecycle, keeping stateful resources (secrets, log 
 import { App, Stack, Tags } from "aws-cdk-lib";
 
 const CONFIG = {
-  staging: { domain: "staging.example.com" },
+  dev: { domain: "dev.example.com" },
   prod: { domain: "example.com" },
 };
 
@@ -88,7 +88,7 @@ on:
     inputs:
       env:
         type: choice
-        options: [staging, prod]
+        options: [dev, prod]
 
 jobs:
   checks:
@@ -110,7 +110,7 @@ jobs:
         if: inputs.env == 'prod'
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIOUS: staging
+          PREVIOUS: dev
         run: |
           id=$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=$PREVIOUS&sha=$GITHUB_SHA" --jq '.[0].id')
           state=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" --jq '.[0].state')

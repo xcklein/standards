@@ -7,7 +7,7 @@ tags: [git, workflow, branching, ci]
 
 ## Directive
 
-All repositories must use trunk-based development. `main` is the only long-lived branch and must always be releasable. Work happens on short-lived branches that merge into `main` through a pull request, using squash merge only; merged branches are deleted. `develop`, `release/*`, and other long-lived branches must not be used. Unfinished work that would not be releasable must stay unreachable (behind a flag or not yet wired in) rather than held back on a branch. Every merge to `main` is tagged by CI with the next semantic version (`vX.Y.Z`), derived from the Conventional Commits since the previous tag; tags are never moved or deleted. Deploys use tags, not branch heads, and a tag is promoted through the environments in a fixed order (e.g. `staging` → `prod`): it may deploy to an environment only after it deployed successfully to the one before.
+All repositories must use trunk-based development. `main` is the only long-lived branch and must always be releasable. Work happens on short-lived branches that merge into `main` through a pull request, using squash merge only; merged branches are deleted. `develop`, `release/*`, and other long-lived branches must not be used. Unfinished work that would not be releasable must stay unreachable (behind a flag or not yet wired in) rather than held back on a branch. Every merge to `main` is tagged by CI with the next semantic version (`vX.Y.Z`), derived from the Conventional Commits since the previous tag; tags are never moved or deleted. Deploys use tags, not branch heads, and a tag is promoted through the environments in a fixed order (e.g. `dev` → `prod`): it may deploy to an environment only after it deployed successfully to the one before.
 
 ## Context and Problem Statement
 
@@ -85,13 +85,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.new_tag }}
-        run: gh workflow run deploy.yml --ref "$TAG" -f env=staging
+        run: gh workflow run deploy.yml --ref "$TAG" -f env=dev
 ```
 
 Promotion — the new tag deploys to the first environment automatically, then is dispatched to each next environment in order. The deploy workflow runs on the tag itself, so the deployed commit is exactly the tagged one:
 
 ```bash
-gh workflow run deploy.yml --ref v1.4.0 -f env=prod   # only after staging succeeded
+gh workflow run deploy.yml --ref v1.4.0 -f env=prod   # only after dev succeeded
 ```
 
 The deploy workflow enforces the order; see ADR-AWS-0004 for the check. A rollback is a deploy of an earlier tag, promoted the same way.
