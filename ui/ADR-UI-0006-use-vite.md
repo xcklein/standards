@@ -7,7 +7,7 @@ tags: [typescript, tooling, build, vite]
 
 ## Directive
 
-All frontend projects must use Vite as the build tool and dev server. A `vite.config.ts` must be present at the project root.
+All frontend projects must use Vite as the build tool and dev server. A `vite.config.ts` must be present at the project root. Content sites use Astro instead (see ADR-UI-0011), which is built on Vite and keeps its Vite configuration under `vite` in `astro.config.ts`.
 
 ## Context and Problem Statement
 
@@ -95,3 +95,4 @@ All frontend projects must use Vite as the build tool and dev server. `vite.conf
 * [Vite documentation](https://vite.dev)
 * Related: [ADR-TS-0003 — Use ESM](../typescript/ADR-TS-0003-use-esm.md)
 * Related: [ADR-TS-0005 — Use Vitest](../typescript/ADR-TS-0005-use-vitest.md)
+* Related: [ADR-UI-0011 — Use Astro for Content Sites](ADR-UI-0011-use-astro-for-content-sites.md)
