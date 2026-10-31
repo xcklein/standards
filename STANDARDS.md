@@ -69,6 +69,7 @@ A flat index of all active standards, grouped by category. Each entry links to t
 | ID | Title | Directive |
 |----|-------|-----------|
 | [ADR-GIT-0001](git/ADR-GIT-0001-conventional-commits.md) | Use Conventional Commits | All commits must follow the Conventional Commits specification. The format is `<type>[optional scope]: <description>`. Breaking changes must be indicated with `!` after the type or a `BREAKING CHANGE:` footer. |
+| [ADR-GIT-0002](git/ADR-GIT-0002-trunk-based-development.md) | Trunk-Based Development | All repositories must use trunk-based development. `main` is the only long-lived branch and must always be releasable. Work happens on short-lived branches that merge into `main` through a pull request within a day or two, using squash merge only; merged branches are deleted. `develop`, `release/*`, and other long-lived branches must not be used. Releases and deploys are cut from `main`, and unfinished work that would not be releasable must stay unreachable rather than held back on a branch. |
 
 ## Testing
 
