@@ -73,7 +73,7 @@ components:
           $ref: '#/components/schemas/Pagination'
 ```
 
-Every project must include a `.spectral.yaml` at the root. `spectral:oas` is required; `spectral:owasp` is recommended:
+Every project must include a `.spectral.yaml` at the root. `spectral:oas` is required; `spectral:owasp` is recommended. The ruleset stays YAML rather than typed JavaScript, because Spectral's published rulesets do not satisfy its own `RulesetDefinition` type, so a typed `.spectral.js` would need casts on the rulesets it extends:
 
 ```yaml
 extends:

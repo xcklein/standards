@@ -7,7 +7,7 @@ tags: [typescript, formatting, tooling]
 
 ## Directive
 
-All TypeScript projects must use Prettier for formatting. Biome must not be used for formatting. Every project must include a `prettier.config.js` and stay as close to Prettier's defaults as possible — `tabWidth` and `printWidth` are the only settings most projects should need to override.
+All TypeScript projects must use Prettier for formatting. Biome must not be used for formatting. Every project must include a `prettier.config.ts` checked with `satisfies Config` and included in a typechecked `tsconfig.json`, and stay as close to Prettier's defaults as possible — `tabWidth` and `printWidth` are the only settings most projects should need to override.
 
 ## Context and Problem Statement
 
@@ -32,21 +32,23 @@ Chosen option: "Prettier", because it is the de facto standard formatter for the
 
 ### Examples
 
-Every TypeScript project must include a `prettier.config.js` at the root. Do not override defaults beyond `tabWidth` and `printWidth` unless there is a specific, documented reason:
+Every TypeScript project must include a `prettier.config.ts` at the root. Do not override defaults beyond `tabWidth` and `printWidth` unless there is a specific, documented reason:
 
-```javascript
-/** @type {import('prettier').Config} */
-export default {};
+```typescript
+import type { Config } from "prettier";
+
+export default {} satisfies Config;
 ```
 
 Most projects will only need to override `tabWidth` and `printWidth`:
 
-```javascript
-/** @type {import('prettier').Config} */
+```typescript
+import type { Config } from "prettier";
+
 export default {
   printWidth: 90,
   tabWidth: 2,
-};
+} satisfies Config;
 ```
 
 A project-specific plugin (e.g. `prettier-plugin-tailwindcss`) is fine to add on top of this, but does not justify changing any other default.
@@ -66,6 +68,7 @@ prettier --check .
 * Good, because formatting is enforced automatically and consistently across every project
 * Good, because `eslint-config-prettier` (see [ADR-TS-0001](ADR-TS-0001-use-linter.md)) removes any conflict between lint and format rules
 * Good, because Prettier has the widest editor and CI support of any TypeScript formatter
+* Good, because `satisfies Config` lets the project's typecheck catch a misspelt option or wrong value
 * Good, because sticking to defaults (aside from `tabWidth`/`printWidth`) keeps configuration diffable and easy to reason about across projects
 * Bad, because Prettier is slower than Biome's formatter, particularly on large codebases
 * Bad, because projects previously on Biome incur a one-time migration cost

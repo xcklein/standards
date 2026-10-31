@@ -77,9 +77,9 @@ Field error tied to its input:
 {error && <p id="email-error">{error}</p>}
 ```
 
-Linting, in `eslint.config.js`:
+Linting, in `eslint.config.ts`:
 
-```javascript
+```typescript
 import jsxA11y from "eslint-plugin-jsx-a11y";
 
 export default [
