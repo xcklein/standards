@@ -7,7 +7,7 @@ tags: [git, workflow, branching, ci]
 
 ## Directive
 
-All repositories must use trunk-based development. `main` is the only long-lived branch and must always be releasable. Work happens on short-lived branches that merge into `main` through a pull request, using squash merge only; merged branches are deleted. `develop`, `release/*`, and other long-lived branches must not be used. Unfinished work that would not be releasable must stay unreachable (behind a flag or not yet wired in) rather than held back on a branch. Every merge to `main` is tagged by CI with the next semantic version (`vX.Y.Z`), derived from the Conventional Commits since the previous tag; tags are never moved or deleted. Deploys use tags, not branch heads, and a tag is promoted through the environments in a fixed order (e.g. `dev` → `prod`): it may deploy to an environment only after it deployed successfully to the one before.
+All repositories must use trunk-based development. `main` is the only long-lived branch and must always be releasable. Work happens on short-lived branches that merge into `main` through a pull request, using squash merge only; merged branches are deleted. `develop`, `release/*`, and other long-lived branches must not be used. Unfinished work that would not be releasable must stay unreachable (behind a flag or not yet wired in) rather than held back on a branch. Every merge to `main` is tagged by CI with the next version, following ADR-GIT-0003; tags are never moved or deleted. Deploys use tags, not branch heads, and a tag is promoted through the environments in a fixed order (e.g. `dev` → `prod`): it may deploy to an environment only after it deployed successfully to the one before.
 
 ## Context and Problem Statement
 
@@ -56,7 +56,7 @@ gh pr create --fill
 
 Shipping a feature over several pull requests without a long-lived branch: merge each piece into `main` while it is unreachable — the route not registered, the UI entry point not linked, or a flag left off — and make it reachable in the final pull request.
 
-Tagging every merge to `main` — the version bump follows the commit type (`fix` → patch, `feat` → minor, `!` or `BREAKING CHANGE` → major):
+Tagging every merge to `main` — the bump follows the merged commit's type, using the rules in ADR-GIT-0003. Squash merge means each push to `main` is exactly one commit:
 
 ```yaml
 name: tag
@@ -77,14 +77,38 @@ jobs:
         with:
           fetch-depth: 0
       - id: version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        name: Tag the next version
+        run: |
+          last=$(git tag --list 'v*' --merged HEAD --sort=-v:refname | head -n 1)
+          if [ -z "$last" ]; then
+            next=0.1.0
+          else
+            IFS=. read -r major minor patch <<< "${last#v}"
+            subject=$(git log -1 --format=%s)
+            if echo "$subject" | grep -qE '^[a-z]+(\(.+\))?!:' \
+              || git log -1 --format=%b | grep -q '^BREAKING CHANGE:'; then
+              bump=major
+            elif echo "$subject" | grep -qE '^feat(\(.+\))?:'; then
+              bump=minor
+            else
+              bump=patch
+            fi
+            # Nothing leaves 0.x automatically; 1.0.0 is tagged by hand.
+            if [ "$major" = 0 ] && [ "$bump" = major ]; then bump=minor; fi
+            case $bump in
+              major) next="$((major + 1)).0.0" ;;
+              minor) next="$major.$((minor + 1)).0" ;;
+              patch) next="$major.$minor.$((patch + 1))" ;;
+            esac
+          fi
+          git tag "v$next"
+          git push origin "v$next"
+          echo "tag=v$next" >> "$GITHUB_OUTPUT"
       # A tag pushed with GITHUB_TOKEN triggers no workflows, but a dispatch does.
       - name: Deploy to the first environment
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.version.outputs.new_tag }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: gh workflow run deploy.yml --ref "$TAG" -f env=dev
 ```
 
@@ -142,6 +166,6 @@ Repository settings must match the table above, and a workflow must tag every pu
 ## More Information
 
 * [Trunk Based Development](https://trunkbaseddevelopment.com/)
-* [Semantic Versioning](https://semver.org/)
 * Related: [ADR-GIT-0001 — Use Conventional Commits](ADR-GIT-0001-conventional-commits.md)
+* Related: [ADR-GIT-0003 — Semantic Versioning](ADR-GIT-0003-semantic-versioning.md)
 * Related: [ADR-AWS-0004 — Environments and Accounts](../aws/ADR-AWS-0004-environments-and-accounts.md)
