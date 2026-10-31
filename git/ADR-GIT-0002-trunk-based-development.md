@@ -7,7 +7,7 @@ tags: [git, workflow, branching, ci]
 
 ## Directive
 
-All repositories must use trunk-based development. `main` is the only long-lived branch and must always be releasable. Work happens on short-lived branches that merge into `main` through a pull request within a day or two, using squash merge only; merged branches are deleted. `develop`, `release/*`, and other long-lived branches must not be used. Releases and deploys are cut from `main`, and unfinished work that would not be releasable must stay unreachable (behind a flag or not yet wired in) rather than held back on a branch.
+All repositories must use trunk-based development. `main` is the only long-lived branch and must always be releasable. Work happens on short-lived branches that merge into `main` through a pull request within a day or two, using squash merge only; merged branches are deleted. `develop`, `release/*`, and other long-lived branches must not be used. Unfinished work that would not be releasable must stay unreachable (behind a flag or not yet wired in) rather than held back on a branch. Every merge to `main` is tagged by CI with the next semantic version (`vX.Y.Z`), derived from the Conventional Commits since the previous tag; tags are never moved or deleted. Deploys use tags, not branch heads, and a tag is promoted through the environments in a fixed order (e.g. `staging` → `prod`): it may deploy to an environment only after it deployed successfully to the one before.
 
 ## Context and Problem Statement
 
@@ -20,6 +20,7 @@ Long-lived branches (GitFlow's `develop` and `release/*`, or feature branches th
 * There should be one branch that answers "what is current"
 * History on `main` should be one Conventional Commit per change (see ADR-GIT-0001)
 * The workflow should suit small teams and AI agents producing many small changes
+* Every environment should run an identifiable, immutable version, and production should only ever run a version that already worked in the environments before it
 
 ## Considered Options
 
@@ -55,6 +56,46 @@ gh pr create --fill
 
 Shipping a feature over several pull requests without a long-lived branch: merge each piece into `main` while it is unreachable — the route not registered, the UI entry point not linked, or a flag left off — and make it reachable in the final pull request.
 
+Tagging every merge to `main` — the version bump follows the commit type (`fix` → patch, `feat` → minor, `!` or `BREAKING CHANGE` → major):
+
+```yaml
+name: tag
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # A tag pushed with GITHUB_TOKEN triggers no workflows, but a dispatch does.
+      - name: Deploy to the first environment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.new_tag }}
+        run: gh workflow run deploy.yml --ref "$TAG" -f env=staging
+```
+
+Promotion — the new tag deploys to the first environment automatically, then is dispatched to each next environment in order. The deploy workflow runs on the tag itself, so the deployed commit is exactly the tagged one:
+
+```bash
+gh workflow run deploy.yml --ref v1.4.0 -f env=prod   # only after staging succeeded
+```
+
+The deploy workflow enforces the order; see ADR-AWS-0004 for the check. A rollback is a deploy of an earlier tag, promoted the same way.
+
 Applying the merge settings with the GitHub CLI:
 
 ```bash
@@ -68,13 +109,15 @@ gh repo edit --enable-squash-merge --enable-merge-commit=false \
 * Good, because CI always runs against the code that will ship
 * Good, because `main` is the single answer to what is current and deployable
 * Good, because squash merge gives `main` one Conventional Commit per pull request
+* Good, because every environment runs a named, immutable version, and production only runs versions that already passed the earlier environments
 * Bad, because large features must be split into pieces that are each safe to merge, sometimes behind a flag
 * Bad, because squash merge discards the branch's individual commits from `main`'s history
 * Bad, because a broken `main` blocks everyone, so CI and branch protection have to be in place
+* Bad, because every change takes a deploy per environment to reach production
 
 ### Confirmation
 
-Repository settings must match the table above. Code review must flag pull requests from long-lived branches, and branches other than `main` that outlive their pull request.
+Repository settings must match the table above, and a workflow must tag every push to `main`. Code review must flag pull requests from long-lived branches, branches other than `main` that outlive their pull request, and deploy workflows that deploy a branch head or skip the promotion order.
 
 ## Pros and Cons of the Options
 
@@ -99,5 +142,6 @@ Repository settings must match the table above. Code review must flag pull reque
 ## More Information
 
 * [Trunk Based Development](https://trunkbaseddevelopment.com/)
+* [Semantic Versioning](https://semver.org/)
 * Related: [ADR-GIT-0001 — Use Conventional Commits](ADR-GIT-0001-conventional-commits.md)
 * Related: [ADR-AWS-0004 — Environments and Accounts](../aws/ADR-AWS-0004-environments-and-accounts.md)

@@ -7,7 +7,7 @@ tags: [aws, cdk, accounts, environments, deployment, ci]
 
 ## Directive
 
-Each environment gets a dedicated AWS account; an account must never host more than one environment. Every deployable repository has a single CDK app that deploys unchanged into any environment: the target account and region come from the deploying credentials (`CDK_DEFAULT_ACCOUNT`/`CDK_DEFAULT_REGION`), the environment name comes from an `env` context value that selects per-environment configuration and fails synth if unknown, and stack IDs are identical across environments. Stacks are split by concern and named `{Service}{Concern}Stack`. Deployments to any shared environment run from CI through a per-account GitHub OIDC role; production deploys only from `main`, after CI passes on the same commit.
+Each environment gets a dedicated AWS account; an account must never host more than one environment. Every deployable repository has a single CDK app that deploys unchanged into any environment: the target account and region come from the deploying credentials (`CDK_DEFAULT_ACCOUNT`/`CDK_DEFAULT_REGION`), the environment name comes from an `env` context value that selects per-environment configuration and fails synth if unknown, and stack IDs are identical across environments. Stacks are split by concern and named `{Service}{Concern}Stack`. Deployments to any shared environment run from CI through a per-account GitHub OIDC role, deploy a release tag after CI passes on the same commit, and promote that tag through the environments in order (see ADR-GIT-0002).
 
 ## Context and Problem Statement
 
@@ -80,7 +80,7 @@ app.synth();
 
 The stack ID is `ApiComputeStack` in every account; only `config` varies by environment.
 
-Deploying — the environment is chosen at dispatch, and each GitHub Environment holds that account's role and region:
+Deploying — the workflow runs on a release tag (see ADR-GIT-0002), the environment is chosen at dispatch, and each GitHub Environment holds that account's role and region. A tag may deploy to an environment only after it deployed successfully to the previous one:
 
 ```yaml
 on:
@@ -101,7 +101,20 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      deployments: read
     steps:
+      - name: Require a release tag
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: echo "::error::Deploy a release tag, not ${{ github.ref }}" && exit 1
+      - name: Require a successful deploy to the previous environment
+        if: inputs.env == 'prod'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS: staging
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=$PREVIOUS&sha=$GITHUB_SHA" --jq '.[0].id')
+          state=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" --jq '.[0].state')
+          [ "$state" = "success" ] || { echo "::error::$GITHUB_REF_NAME has not deployed to $PREVIOUS"; exit 1; }
       - uses: actions/checkout@v5
       - uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -110,7 +123,7 @@ jobs:
       - run: pnpm cdk deploy --all -c env=${{ inputs.env }} --require-approval never
 ```
 
-The `prod` GitHub Environment's deployment branch policy allows only `main`, and the `olatile-prod` role's trust policy accepts only that environment, so a production deploy from any other branch fails at "Assume Role".
+Each GitHub Environment's deployment policy allows only tags matching `v*`, and the `olatile-prod` role's trust policy accepts only the `prod` environment, so a production deploy of anything but a release tag fails at "Assume Role".
 
 Not supported — environments separated by suffix inside one account:
 
@@ -133,7 +146,7 @@ new ComputeStack(app, `ApiComputeStack-${envName}`, { env });
 
 ### Confirmation
 
-Code review must flag stack IDs or resource names that embed an environment name, hardcoded account IDs used to select the target account, environment conditionals inside stacks instead of in the app's config object, and deploy workflows that use long-lived access keys or can deploy `prod` from a branch other than `main`. Synth must fail when `env` is missing or unknown.
+Code review must flag stack IDs or resource names that embed an environment name, hardcoded account IDs used to select the target account, environment conditionals inside stacks instead of in the app's config object, and deploy workflows that use long-lived access keys, deploy anything other than a release tag, or can deploy a tag to an environment before it succeeded in the previous one. Synth must fail when `env` is missing or unknown.
 
 ## Pros and Cons of the Options
 
@@ -155,5 +168,6 @@ Code review must flag stack IDs or resource names that embed an environment name
 * Related: [ADR-AWS-0001 — Use CDK](ADR-AWS-0001-use-cdk.md)
 * Related: [ADR-AWS-0002 — Use CDK Nag](ADR-AWS-0002-use-cdk-nag.md)
 * Related: [ADR-AWS-0003 — Tag All Resources](ADR-AWS-0003-tag-all-resources.md)
+* Related: [ADR-GIT-0002 — Trunk-Based Development](../git/ADR-GIT-0002-trunk-based-development.md)
 * Reference implementation: `infra/` and `.github/workflows/deploy.yml` in xcklein/olatile-api
 * [AWS — Organizing your AWS environment using multiple accounts](https://docs.aws.amazon.com/whitepapers/latest/organizing-your-aws-environment/organizing-your-aws-environment.html)
