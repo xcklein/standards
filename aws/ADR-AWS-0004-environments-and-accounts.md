@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-04
 tags: [aws, cdk, accounts, environments, deployment, ci]
 ---
