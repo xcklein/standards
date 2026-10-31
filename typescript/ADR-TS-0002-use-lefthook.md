@@ -7,7 +7,11 @@ tags: [typescript, tooling, git, pre-commit]
 
 ## Directive
 
-All TypeScript projects must use Lefthook for Git hooks. A Lefthook config must be present at the project root, in any format Lefthook resolves natively (`lefthook.yml`, `.yaml`, `.json`, or `.toml`). At minimum it must run `eslint --fix` and `prettier --write` on staged files via a `pre-commit` hook and enforce commit message format via a `commit-msg` hook (see ADR-GIT-0001).
+All TypeScript projects must use Lefthook for Git hooks. A Lefthook config must be present at the project root, in any format Lefthook resolves natively (`lefthook.yml`, `.yaml`, `.json`, or `.toml`). At minimum it must:
+
+* `pre-commit`: run `eslint --fix` and `prettier --write` on staged files, and type check the whole project (`pnpm typecheck`)
+* `pre-push`: run `pnpm install --frozen-lockfile --offline`, then the tests, in that order (`piped: true`)
+* `commit-msg`: enforce the commit message format (see ADR-GIT-0001)
 
 ## Context and Problem Statement
 
@@ -18,6 +22,9 @@ Linting and formatting must be enforced automatically before code enters version
 * Pre-commit hooks must run automatically without developer intervention
 * Agent-written code must be validated before it enters version control
 * Hook configuration should be version-controlled and consistent across all contributors
+* A type change can break a file that was not edited, so type checking only staged files is not enough
+* Commits must stay fast; slower checks (tests) belong on push, not on every commit
+* A push must not carry a `package.json` change without the matching `pnpm-lock.yaml` change, which would fail CI's frozen install
 
 ## Considered Options
 
@@ -37,20 +44,31 @@ pre-commit:
   commands:
     eslint:
       glob: "*.{ts,tsx,js,jsx}"
-      run: npx eslint --fix {staged_files}
+      run: pnpm exec eslint --fix {staged_files}
       stage_fixed: true
     prettier:
       glob: "*.{ts,tsx,js,jsx,json,md}"
-      run: npx prettier --write {staged_files}
+      run: pnpm exec prettier --write {staged_files}
       stage_fixed: true
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: pnpm typecheck
+
+pre-push:
+  piped: true
+  jobs:
+    - name: lockfile
+      run: pnpm install --frozen-lockfile --offline
+    - name: test
+      run: pnpm test
 
 commit-msg:
   commands:
     commitlint:
-      run: pnpm commitlint --edit {1}
+      run: pnpm exec commitlint --edit {1}
 ```
 
-`stage_fixed: true` ensures files auto-fixed by ESLint or Prettier are re-staged automatically before the commit completes. The `commit-msg` hook enforces the Conventional Commits format on every commit (see ADR-GIT-0001).
+`stage_fixed: true` re-stages files auto-fixed by ESLint or Prettier before the commit completes. `typecheck` runs on the whole project (`tsc --noEmit` or `tsc -b`), but only when a TypeScript file is staged. `piped: true` makes the lockfile check run first and stop the push on a mismatch, and keeps the tests from racing the install. `--offline` keeps the check fast and avoids network access. Projects may add further pre-push checks (e.g. Spectral) after the lockfile step.
 
 ### Consequences
 
@@ -59,8 +77,14 @@ commit-msg:
 * Good, because hook configuration is version-controlled and consistent across all contributors
 * Good, because Lefthook has no Node.js runtime dependency — works in any repo
 * Good, because `stage_fixed: true` automatically re-stages files fixed by ESLint/Prettier
+* Good, because type errors and lockfile mismatches are caught before CI
 * Bad, because developers must install Lefthook locally for hooks to run
-* Bad, because hooks can be bypassed with `git commit --no-verify`
+* Bad, because hooks can be bypassed with `git commit --no-verify`, so CI must still run the same checks
+* Bad, because a whole-project type check and the test suite slow down commits and pushes in large projects
+
+### Confirmation
+
+Code review must flag a Lefthook config missing any of the required hooks above.
 
 ## Pros and Cons of the Options
 
