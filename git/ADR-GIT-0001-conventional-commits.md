@@ -83,9 +83,13 @@ commit-msg:
       run: pnpm commitlint --edit {1}
 ```
 
-```js
-// commitlint.config.js
-export default { extends: ["@commitlint/config-conventional"] };
+```typescript
+// commitlint.config.ts
+import type { UserConfig } from "@commitlint/types";
+
+export default {
+  extends: ["@commitlint/config-conventional"],
+} satisfies UserConfig;
 ```
 
 ## Pros and Cons of the Options

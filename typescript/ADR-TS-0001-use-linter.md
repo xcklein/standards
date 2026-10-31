@@ -7,7 +7,7 @@ tags: [typescript, linting, tooling, react]
 
 ## Directive
 
-All TypeScript projects must use ESLint for linting. Biome must not be used for linting. Every project must include a flat config at the project root, following the standard configuration. Any filename ESLint resolves natively is acceptable — `eslint.config.js`, `.mjs`, `.cjs`, or `.ts`; pick whichever the project's module type makes unambiguous.
+All TypeScript projects must use ESLint for linting. Biome must not be used for linting. Every project must include a flat config, `eslint.config.ts`, at the project root, following the standard configuration, and a `tsconfig.json` must include it so `pnpm typecheck` checks it. `jiti` must be a dev dependency, since ESLint loads TypeScript configs through it.
 
 ## Context and Problem Statement
 
@@ -32,9 +32,9 @@ Chosen option: "ESLint", because its plugin ecosystem — particularly `eslint-p
 
 ### Examples
 
-Every TypeScript project must include an `eslint.config.js` at the root:
+Every TypeScript project must include an `eslint.config.ts` at the root, with `jiti` as a dev dependency:
 
-```javascript
+```typescript
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettier from "eslint-config-prettier";
@@ -56,7 +56,7 @@ The trailing `prettier` import is `eslint-config-prettier` — it disables ESLin
 
 React projects add `eslint-plugin-react` and `eslint-plugin-react-hooks` on top of this base config (see [ADR-UI-0001](../ui/ADR-UI-0001-use-react.md)):
 
-```javascript
+```typescript
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
@@ -88,9 +88,11 @@ eslint . --fix
 ### Consequences
 
 * Good, because `eslint-plugin-react` and `eslint-plugin-react-hooks` give React/JSX projects rule coverage Biome lacks
+* Good, because the project's typecheck catches a misspelt option or wrong value in the config, which a `.js` config with a JSDoc `@type` only flags in an editor
 * Good, because a single linter applies across every project — no conditional per-project selection
 * Good, because ESLint's plugin ecosystem covers project-specific needs (imports, a11y, etc.) as they arise
 * Bad, because ESLint is slower than Biome, particularly on large codebases
+* Bad, because loading a TypeScript config needs `jiti` as an extra dev dependency
 * Bad, because projects previously on Biome incur a one-time migration cost
 
 ### Confirmation

@@ -37,9 +37,10 @@ Chosen option: "Lefthook", because it is lightweight, fast, and requires no Node
 
 ### Examples
 
-Add a `lefthook.yml` at the repository root:
+Add a `lefthook.yml` at the repository root. Lefthook can't load a typed config, so the first line names its JSON schema so editors validate it:
 
 ```yaml
+# yaml-language-server: $schema=https://json.schemastore.org/lefthook.json
 pre-commit:
   commands:
     eslint:
